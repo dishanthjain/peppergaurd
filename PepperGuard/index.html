@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#15221b" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='12' fill='%232f8a5c'/%3E%3C/svg%3E" />
+  <title>PepperGuard — Storage Intelligence</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <div class="app-shell">
+    <aside class="sidebar" id="sidebar">
+      <div class="brand"><span class="brand-mark" aria-hidden="true">●</span><span>PepperGuard</span></div>
+      <div class="facility-mini"><span class="live-dot"></span><div><strong>IIHR Pilot Facility</strong><small>4 sensors online</small></div></div>
+      <nav aria-label="Primary navigation">
+        <button class="nav-item active" data-page="dashboard"><span>⌂</span>Overview</button>
+        <button class="nav-item" data-page="batches"><span>▦</span>Storage batches</button>
+        <button class="nav-item" data-page="alerts"><span>◇</span>Alerts <b id="navAlertCount">0</b></button>
+        <button class="nav-item" data-page="analytics"><span>⌁</span>Analytics</button>
+        <button class="nav-item" data-page="integration"><span>⚙</span>IoT integration</button>
+      </nav>
+      <div class="sidebar-note"><span>Environmental model</span><strong>Not a contamination test</strong><small>Lab testing is required to confirm suspected contamination.</small></div>
+      <div class="user-card"><div class="avatar">DJ</div><div><strong>Dishanth Jain</strong><small>Demo administrator</small></div></div>
+    </aside>
+
+    <div class="workspace">
+      <header class="topbar">
+        <button class="icon-button menu-button" id="menuButton" aria-label="Toggle menu">☰</button>
+        <div><p class="eyebrow" id="pageEyebrow">Storage intelligence</p><h1 id="pageTitle">Overview</h1></div>
+        <div class="topbar-actions"><div class="last-sync"><span class="live-dot"></span><span><b>Live simulation</b><small id="lastUpdated">Updated now</small></span></div><button class="secondary-button" id="exportButton">Export data</button><button class="primary-button" id="addBatchButton">＋ Add batch</button></div>
+      </header>
+
+      <main id="main">
+        <section class="page active" id="page-dashboard">
+          <div class="hero-status" id="heroStatus">
+            <div><p class="eyebrow">Facility condition</p><div class="status-heading"><span class="status-icon" id="statusIcon">✓</span><div><h2 id="overallStatus">SAFE</h2><p id="statusCopy">Storage conditions are within the configured range.</p></div></div></div>
+            <div class="sim-control"><label for="scenarioSelect">Demonstration scenario</label><select id="scenarioSelect"><option value="normal">Normal conditions</option><option value="rising">Rising humidity</option><option value="critical">Critical conditions</option></select><button id="pauseButton" class="secondary-button">Pause</button></div>
+          </div>
+
+          <div class="metrics-grid">
+            <article class="metric-card"><div class="metric-icon humidity">◉</div><div><span>Average humidity</span><strong id="metricHumidity">—</strong><small id="humidityDelta">Across active batches</small></div></article>
+            <article class="metric-card"><div class="metric-icon temp">⌁</div><div><span>Average temperature</span><strong id="metricTemp">—</strong><small>Across active batches</small></div></article>
+            <article class="metric-card"><div class="metric-icon risk">△</div><div><span>Highest risk score</span><strong id="metricRisk">—</strong><small id="riskBatch">Environmental prediction</small></div></article>
+            <article class="metric-card"><div class="metric-icon batches">▣</div><div><span>Monitored batches</span><strong id="metricBatches">—</strong><small id="activeAlertsMetric">— active alerts</small></div></article>
+          </div>
+
+          <div class="dashboard-grid">
+            <article class="panel chart-panel wide"><div class="panel-head"><div><p class="eyebrow">Last 24 readings</p><h3>Storage environment</h3></div><div class="legend"><span><i class="humidity-line"></i>Humidity %</span><span><i class="temp-line"></i>Temperature °C</span></div></div><div class="chart-wrap"><canvas id="environmentChart" aria-label="Humidity and temperature history chart"></canvas><div class="chart-tooltip" id="envTooltip"></div></div></article>
+            <article class="panel risk-focus"><div class="panel-head"><div><p class="eyebrow">Priority batch</p><h3 id="focusBatchName">—</h3></div><span class="status-badge" id="focusBadge">—</span></div><div class="risk-gauge"><svg viewBox="0 0 180 100" role="img" aria-label="Risk gauge"><path d="M20 90 A70 70 0 0 1 160 90" class="gauge-track"/><path id="gaugeValue" d="M20 90 A70 70 0 0 1 160 90" class="gauge-value"/><line id="gaugeNeedle" x1="90" y1="90" x2="90" y2="28"/><circle cx="90" cy="90" r="6"/></svg><div><strong id="gaugeScore">—</strong><span>/ 100 risk</span></div></div><div class="reason-box"><strong>Why this score?</strong><ul id="riskReasons"></ul></div></article>
+            <article class="panel"><div class="panel-head"><div><p class="eyebrow">Live feed</p><h3>Recent readings</h3></div><span class="sensor-online"><i></i>Receiving</span></div><div class="readings-list" id="recentReadings"></div></article>
+            <article class="panel"><div class="panel-head"><div><p class="eyebrow">Action queue</p><h3>Active alerts</h3></div><button class="text-button" data-go="alerts">View all</button></div><div class="alert-list" id="dashboardAlerts"></div></article>
+          </div>
+        </section>
+
+        <section class="page" id="page-batches">
+          <div class="section-intro"><div><h2>Storage batches</h2><p>Monitor environmental conditions by lot and storage zone.</p></div><div class="filters"><input id="batchSearch" type="search" placeholder="Search batch, grade or zone" aria-label="Search batches"><select id="statusFilter" aria-label="Filter by status"><option value="all">All statuses</option><option>SAFE</option><option>WARNING</option><option>HIGH</option><option>CRITICAL</option></select></div></div>
+          <div class="table-card"><div class="table-scroll"><table><thead><tr><th>Batch</th><th>Grade</th><th>Quantity</th><th>Storage zone</th><th>Date stored</th><th>Humidity</th><th>Temperature</th><th>Risk</th><th>Status</th></tr></thead><tbody id="batchTableBody"></tbody></table></div></div>
+        </section>
+
+        <section class="page" id="page-alerts">
+          <div class="section-intro"><div><h2>Alerts & recommendations</h2><p>Prioritized, explainable environmental risk events.</p></div><button class="secondary-button" id="resolveAllButton">Resolve all visible</button></div>
+          <div class="alert-summary" id="alertSummary"></div><div class="alerts-page-list" id="alertsPageList"></div>
+        </section>
+
+        <section class="page" id="page-analytics">
+          <div class="section-intro"><div><h2>Environmental analytics</h2><p>Compare humidity, temperature and predicted risk over time.</p></div><select id="analyticsBatchSelect" aria-label="Select batch"></select></div>
+          <div class="analytics-cards"><article><span>24h humidity average</span><strong id="analyticsAvgHumidity">—</strong></article><article><span>24h temperature average</span><strong id="analyticsAvgTemp">—</strong></article><article><span>Peak predicted risk</span><strong id="analyticsPeakRisk">—</strong></article><article><span>Time above 75% RH</span><strong id="analyticsHoursHigh">—</strong></article></div>
+          <div class="analytics-grid"><article class="panel"><div class="panel-head"><div><p class="eyebrow">Relative humidity</p><h3>Humidity history</h3></div><span class="threshold-key">Safe target &lt; 70%</span></div><div class="chart-wrap"><canvas id="humidityChart" aria-label="Humidity history"></canvas></div></article><article class="panel"><div class="panel-head"><div><p class="eyebrow">Temperature</p><h3>Temperature history</h3></div><span class="threshold-key">Target 20–27°C</span></div><div class="chart-wrap"><canvas id="temperatureChart" aria-label="Temperature history"></canvas></div></article><article class="panel full"><div class="panel-head"><div><p class="eyebrow">Environmental model</p><h3>Risk score history</h3></div><span class="threshold-key">High risk &gt; 60</span></div><div class="chart-wrap"><canvas id="riskChart" aria-label="Risk score history"></canvas></div></article></div>
+        </section>
+
+        <section class="page" id="page-integration">
+          <div class="section-intro"><div><h2>IoT integration</h2><p>Connect ESP32 devices later without changing the dashboard model.</p></div><span class="status-badge safe">SIMULATOR ACTIVE</span></div>
+          <div class="integration-grid"><article class="panel"><p class="eyebrow">Device contract</p><h3>HTTP sensor ingestion</h3><p class="body-copy">Send authenticated JSON readings from an ESP32 gateway to the future ingestion endpoint. The simulator uses this same reading shape.</p><pre><code>POST /api/v1/readings
+Authorization: Bearer &lt;device-token&gt;
+Content-Type: application/json
+
+{
+  "deviceId": "ESP32-ZONE-A-01",
+  "batchId": "B-012",
+  "temperatureC": 27.4,
+  "humidityPct": 78.6,
+  "recordedAt": "2026-09-14T10:30:00Z"
+}</code></pre><div class="check-list"><span>✓ Device and batch validation</span><span>✓ Timestamped readings</span><span>✓ Same transparent risk engine</span><span>✓ Offline buffering recommended</span></div></article><article class="panel"><p class="eyebrow">Rollout path</p><h3>Hardware readiness</h3><ol class="timeline"><li><b>Prototype</b><span>ESP32 + SHT31/DHT22 sensor inside a ventilated probe enclosure.</span></li><li><b>Pilot</b><span>Calibrate against reference instruments; compare sensor placement across sack stacks.</span></li><li><b>Validation</b><span>Work with post-harvest scientists to validate thresholds and sampling intervals.</span></li><li><b>Production</b><span>Add a secure API, device registry, SMS/WhatsApp alerts and audit logs.</span></li></ol><div class="callout"><strong>Safety boundary</strong><p>PepperGuard predicts environmental fungal-spoilage risk. It does not detect Aspergillus, aflatoxin or product safety. Suspected contamination requires inspection and accredited laboratory testing.</p></div></article></div>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <dialog id="batchDialog"><form method="dialog" id="batchForm"><div class="dialog-head"><div><p class="eyebrow">New monitoring record</p><h2>Add storage batch</h2></div><button value="cancel" class="icon-button" aria-label="Close">×</button></div><div class="form-grid"><label>Batch ID<input name="id" required placeholder="B-016"></label><label>Pepper grade<select name="grade"><option>Malabar Garbled</option><option>Tellicherry Garbled Extra Bold</option><option>Malabar Ungarbled</option><option>Light Berries</option></select></label><label>Quantity (kg)<input name="quantity" type="number" min="1" required value="500"></label><label>Storage zone<input name="location" required placeholder="Zone E · Rack 02"></label><label>Date stored<input name="dateStored" type="date" required></label><label>Starting humidity (%)<input name="humidity" type="number" min="20" max="99" step="0.1" value="62"></label></div><div class="dialog-actions"><button value="cancel" class="secondary-button">Cancel</button><button value="default" class="primary-button" id="saveBatchButton">Add & monitor</button></div></form></dialog>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script src="app.js"></script>
+</body>
+</html>
